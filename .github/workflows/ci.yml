@@ -18,13 +18,13 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true  
+        # continue-on-error: true  
 
       - name: Run Semgrep SAST
         run: |
           python -m pip install semgrep
           semgrep scan --config auto
-        continue-on-error: true  
+        # continue-on-error: true  
 
       - name: Run Trivy FS Scan
         uses: aquasecurity/trivy-action@master
@@ -32,7 +32,8 @@ jobs:
           scan-type: 'fs'
           scan-ref: '.'
           format: 'table'
-          exit-code: '0' 
+          exit-code: '1'
+          severity: 'HIGH,CRITICAL'
 
       # NEW STEP 5: Build the Docker Image
       - name: Build Docker Image
