@@ -1,0 +1,17 @@
+name: Secure CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Verify Checkout
+        run: |
+          echo "Success! The pipeline woke up and downloaded the code."
+          ls -la
