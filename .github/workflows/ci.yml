@@ -4,14 +4,36 @@ on:
   push:
     branches:
       - main
+
 jobs:
   build-and-scan:
+    name: Build and Security Scan
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Download the repository code
       - name: Checkout Code
         uses: actions/checkout@v4
-      - name: Verify Checkout
+      
+      # Step 2: Gitleaks (Secret Scanning)
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true  # This stops the pipeline from failing
+
+      # Step 3: Semgrep (Code Scanning)
+      - name: Run Semgrep SAST
         run: |
-          echo "Success! The pipeline woke up and downloaded the code."
-          ls -la
+          python -m pip install semgrep
+          semgrep scan --config auto
+        continue-on-error: true  # This stops the pipeline from failing
+
+      # Step 4: Trivy (File System Dependency Scanning)
+      - name: Run Trivy FS Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          exit-code: '0' # The '0' tells Trivy not to fail the build
